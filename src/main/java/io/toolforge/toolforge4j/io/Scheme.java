@@ -138,7 +138,7 @@ import java.util.Optional;
         break;
       default:
         throw new IllegalArgumentException("unrecognized scheme " + uri);
-    };
+    }
     return result;
   }
 
