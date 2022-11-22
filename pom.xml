@@ -94,9 +94,6 @@
                                 <root>src/main/java</root>
                                 <root>src/test/java</root>
                             </roots>
-                            <excludes>
-                                <exclude>**/com/ibm/icu/**</exclude>
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
