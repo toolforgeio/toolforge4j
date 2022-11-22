@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -52,7 +53,7 @@ public class OutputSinkTest {
 
       OutputSink unit = new OutputSink(uri);
       try (OutputStream out = unit.getOutputStream()) {
-        out.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
       }
 
       try (InputStream in = new FileInputStream(file)) {
@@ -79,10 +80,54 @@ public class OutputSinkTest {
 
       OutputSink unit = new OutputSink(uri);
       try (OutputStream out = unit.getOutputStream()) {
-        out.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
       }
 
       observed = server.takeRequest().getBody().readUtf8();
+    }
+
+    assertThat(observed, is(expected));
+  }
+
+  @Test
+  public void fromStringTest() throws IOException {
+    String expected = "Hello, world!";
+
+    String observed;
+    File file = File.createTempFile("test.", ".txt");
+    try {
+      OutputSink unit = OutputSink.fromString(file.toURI().toString());
+      try (OutputStream out = unit.getOutputStream()) {
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
+      }
+
+      try (InputStream in = new FileInputStream(file)) {
+        observed = new String(ByteStreams.toByteArray(in), StandardCharsets.UTF_8);
+      }
+    } finally {
+      file.delete();
+    }
+
+    assertThat(observed, is(expected));
+  }
+
+  @Test
+  public void getReaderTest() throws IOException {
+    String expected = "Hello, world!";
+
+    String observed;
+    File file = File.createTempFile("test.", ".txt");
+    try {
+      OutputSink unit = OutputSink.fromString(file.toURI().toString());
+      try (Writer w = unit.getWriter(StandardCharsets.UTF_8)) {
+        w.write(expected);
+      }
+
+      try (InputStream in = new FileInputStream(file)) {
+        observed = new String(ByteStreams.toByteArray(in), StandardCharsets.UTF_8);
+      }
+    } finally {
+      file.delete();
     }
 
     assertThat(observed, is(expected));

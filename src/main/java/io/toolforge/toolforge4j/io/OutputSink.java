@@ -28,8 +28,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 
 public class OutputSink {
-  public static InputSource fromString(String s) {
-    return new InputSource(URI.create(s));
+  public static OutputSink fromString(String s) {
+    return new OutputSink(URI.create(s));
   }
 
   private final URI uri;

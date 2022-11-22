@@ -28,11 +28,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
@@ -47,7 +49,7 @@ public class InputSourceTest {
     File file = File.createTempFile("test.", ".txt");
     try {
       try (OutputStream out = new FileOutputStream(file)) {
-        out.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
       }
 
       URI uri = file.toURI();
@@ -84,6 +86,52 @@ public class InputSourceTest {
       try (InputStream in = unit.getInputStream()) {
         observed = new String(ByteStreams.toByteArray(in), StandardCharsets.UTF_8);
       }
+    }
+
+    assertThat(observed, is(expected));
+  }
+
+  @Test
+  public void fromStringTest() throws IOException {
+    String expected = "Hello, world!";
+
+    String observed;
+    File file = File.createTempFile("test.", ".txt");
+    try {
+      try (OutputStream out = new FileOutputStream(file)) {
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
+      }
+
+      InputSource unit = InputSource.fromString(file.toURI().toString());
+
+      try (InputStream in = unit.getInputStream()) {
+        observed = new String(ByteStreams.toByteArray(in), StandardCharsets.UTF_8);
+      }
+    } finally {
+      file.delete();
+    }
+
+    assertThat(observed, is(expected));
+  }
+
+  @Test
+  public void getReaderTest() throws IOException {
+    String expected = "Hello, world!";
+
+    String observed;
+    File file = File.createTempFile("test.", ".txt");
+    try {
+      try (OutputStream out = new FileOutputStream(file)) {
+        out.write(expected.getBytes(StandardCharsets.UTF_8));
+      }
+
+      InputSource unit = InputSource.fromString(file.toURI().toString());
+
+      try (Reader in = unit.getReader(StandardCharsets.UTF_8)) {
+        observed = CharStreams.toString(in);
+      }
+    } finally {
+      file.delete();
     }
 
     assertThat(observed, is(expected));
